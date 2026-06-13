@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { User } from '../../interfaces/User';
-import { Todo } from '../../interfaces/Todo';
+import usersFromServer from '../../api/users';
 
 type Props = {
-  onAdd: (todo: Todo) => void;
-  users: User[];
-  todos: Todo[];
+  onAdd: (data: { title: string; userId: number }) => void;
 };
 
-export const TodoForm: React.FC<Props> = ({ onAdd, users, todos }) => {
+export const TodoForm: React.FC<Props> = ({ onAdd }) => {
+  const users = usersFromServer;
+
   const [title, setTitle] = useState('');
   const [titleTouched, setTitleTouched] = useState(false);
   const [userId, setUserId] = useState(0);
@@ -16,10 +15,6 @@ export const TodoForm: React.FC<Props> = ({ onAdd, users, todos }) => {
 
   const titleError = titleTouched && !title;
   const userIdError = userIdTouched && !userId;
-
-  const getNewId = () => {
-    return Math.max(...todos.map(todo => todo.id)) + 1;
-  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,12 +26,7 @@ export const TodoForm: React.FC<Props> = ({ onAdd, users, todos }) => {
       return;
     }
 
-    onAdd({
-      id: getNewId(),
-      title,
-      userId,
-      completed: false,
-    });
+    onAdd({ title, userId });
 
     setTitle('');
     setUserId(0);
@@ -63,7 +53,7 @@ export const TodoForm: React.FC<Props> = ({ onAdd, users, todos }) => {
         <select
           data-cy="userSelect"
           value={userId}
-          onChange={e => setUserId(Number(e.target.value))}
+          onChange={event => setUserId(Number(event.target.value))}
           onBlur={() => setUserIdTouched(true)}
         >
           <option value={0} disabled>
