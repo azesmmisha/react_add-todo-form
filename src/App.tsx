@@ -5,40 +5,43 @@ import todosFromServer from './api/todos';
 import { useState } from 'react';
 import { TodoList } from './components/TodoList';
 import { Todo } from './interfaces/Todo';
+import { User } from './interfaces/User';
 
 export const App = () => {
-  const enrichTodos = (todos: Todo[]) => {
-    return todos.map(todo => ({
-      ...todo,
-      user: usersFromServer.find(u => u.id === todo.userId),
+  const enrichTodos = (todos: Omit<Todo, 'user'>[]): Todo[] => {
+    return todos.map(todoItem => ({
+      ...todoItem,
+      user: usersFromServer.find(
+        userItem => userItem.id === todoItem.userId,
+      ) as User,
     }));
   };
 
-  const [todos, setTodos] = useState<Todo[]>(enrichTodos(todosFromServer));
+  const [todos, setTodos] = useState<Todo[]>(
+    enrichTodos(todosFromServer as Omit<Todo, 'user'>[]),
+  );
 
-  const getNewId = () => {
-    return Math.max(...todos.map(todo => todo.id)) + 1;
+  const getNewId = (): number => {
+    return Math.max(...todos.map(todoItem => todoItem.id)) + 1;
   };
 
   const handleAdd = ({ title, userId }: { title: string; userId: number }) => {
-    const user = usersFromServer.find(u => u.id === userId);
-
     const newTodo: Todo = {
       id: getNewId(),
       title,
       userId,
       completed: false,
-      user,
+      user: usersFromServer.find(userItem => userItem.id === userId) as User,
     };
 
-    setTodos(prev => [...prev, newTodo]);
+    setTodos(previousTodos => [...previousTodos, newTodo]);
   };
 
   return (
     <div className="App">
       <h1>Add todo form</h1>
 
-      <TodoForm onAdd={handleAdd} />
+      <TodoForm onAdd={handleAdd} users={usersFromServer} />
       <TodoList todos={todos} />
     </div>
   );

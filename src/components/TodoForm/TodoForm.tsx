@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import usersFromServer from '../../api/users';
+import { User } from '../../interfaces/User';
 
 type Props = {
   onAdd: (data: { title: string; userId: number }) => void;
+  users: User[];
 };
 
-export const TodoForm: React.FC<Props> = ({ onAdd }) => {
-  const users = usersFromServer;
-
+export const TodoForm: React.FC<Props> = ({ onAdd, users }) => {
   const [title, setTitle] = useState('');
   const [titleTouched, setTitleTouched] = useState(false);
   const [userId, setUserId] = useState(0);
